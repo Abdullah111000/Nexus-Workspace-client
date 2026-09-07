@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Command,
   LayoutDashboard,
+  LogOut,
   Menu,
   Moon,
   Search,
@@ -147,8 +148,8 @@ export default function Shell() {
           <button className="btn-ghost px-2" onClick={() => dispatch(toggleSidebar())}>
             <Menu size={16} />
           </button>
-          <button className="btn-ghost flex-1 justify-start text-stone-500" onClick={() => dispatch(setCommandOpen(true))}>
-            <Command size={14} /> Search or jump… <span className="kbd ml-auto">⌘K</span>
+          <button className="btn-ghost min-w-0 flex-1 justify-start text-stone-500" onClick={() => dispatch(setCommandOpen(true))}>
+            <Command size={14} className="shrink-0" /> <span className="truncate">Search or jump…</span> <span className="kbd ml-auto hidden sm:inline">⌘K</span>
           </button>
           {offline && (
             <span className="flex items-center gap-1 text-xs text-amber-700">
@@ -169,8 +170,9 @@ export default function Shell() {
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <Notifications count={notifications.unread} />
-          <button className="btn-ghost text-xs" onClick={() => dispatch(logout())}>
-            Log out
+          <button className="btn-ghost px-2 sm:px-3.5" onClick={() => dispatch(logout())} aria-label="Log out" title="Log out">
+            <LogOut size={14} className="sm:hidden" />
+            <span className="hidden sm:inline">Log out</span>
           </button>
         </header>
         <main className="min-h-0 flex-1 overflow-auto p-4 lg:p-6">

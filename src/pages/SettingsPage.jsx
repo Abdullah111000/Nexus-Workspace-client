@@ -81,7 +81,7 @@ export default function SettingsPage() {
               <div className="flex gap-2">
                 <select
                   className="input font-medium"
-                  style={{ width: m.role === 'owner' ? '240px' : '112px', minWidth: m.role === 'owner' ? '240px' : '112px' }}
+                  style={{ width: m.role === 'owner' ? '200px' : '112px', minWidth: m.role === 'owner' ? '200px' : '112px' }}
                   value={m.role}
                   disabled={!canAdmin(role) || m.role === 'owner'}
                   onChange={async (e) => {
