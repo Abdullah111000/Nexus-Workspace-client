@@ -5,7 +5,8 @@ let socket;
 
 export function getSocket() {
   const token = localStorage.getItem('wm_token');
-  if (!token) return null;
+  const hasDedicatedSocket = Boolean(import.meta.env.VITE_SOCKET_URL);
+  if (!token || (import.meta.env.PROD && !hasDedicatedSocket)) return null;
   if (!socket) {
     socket = io(API_ORIGIN || '/', { auth: { token } });
   }
