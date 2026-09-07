@@ -20,7 +20,9 @@ export default function WorkspaceHome() {
   const [template, setTemplate] = useState('sprint');
   const role = current?.myRole;
   const workspaceLoading =
-    workspacesStatus !== 'ready' || (workspaces.length > 0 && currentStatus !== 'ready');
+    workspacesStatus === 'loading' || (workspaces.length > 0 && currentStatus === 'loading');
+  const workspaceError =
+    workspacesStatus === 'error' || (workspaces.length > 0 && currentStatus === 'error');
 
   useEffect(() => {
     api.get('/projects/templates').then((r) => setTemplates(r.data));
@@ -30,6 +32,20 @@ export default function WorkspaceHome() {
     return (
       <div className="grid place-items-center py-24" aria-label="Loading workspace">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-accent" />
+      </div>
+    );
+  }
+
+  if (workspaceError) {
+    return (
+      <div className="grid place-items-center py-24">
+        <div className="panel max-w-md p-8 text-center">
+          <h1 className="font-display text-2xl">Workspace could not load</h1>
+          <p className="mt-2 text-sm text-stone-500">The server did not return your workspace data.</p>
+          <button className="btn-primary mt-6" type="button" onClick={() => dispatch(loadWorkspaces())}>
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
