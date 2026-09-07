@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu,
   Moon,
+  Plus,
   Search,
   Settings,
   Sun,
@@ -39,6 +40,7 @@ export default function Shell() {
   const { theme, sidebarOpen, offline, pendingQueue } = useSelector((s) => s.ui);
   const { workspaceId } = useParams();
   const wsId = workspaceId || current?._id || workspaces[0]?._id;
+  const [createWorkspaceOpen, setCreateWorkspaceOpen] = useState(false);
 
   useEffect(() => {
     dispatch(loadWorkspaces());
@@ -117,7 +119,7 @@ export default function Shell() {
             <div className="text-[11px] text-stone-500">Workspace OS</div>
           </div>
         </div>
-        <WorkspaceSelector />
+        <WorkspaceSelector onCreateWorkspace={() => setCreateWorkspaceOpen(true)} />
         <nav className="flex-1 space-y-1 px-2 text-sm">
           <NavLink className={navCls} to={current ? `/w/${current._id}` : '/'}>
             <LayoutDashboard size={16} /> Home
@@ -142,6 +144,8 @@ export default function Shell() {
           <span className="truncate">{user.name}</span>
         </button>
       </aside>
+
+      {createWorkspaceOpen && <CreateWorkspaceModal onClose={() => setCreateWorkspaceOpen(false)} />}
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-stone-200/70 bg-ink-50/80 px-3 py-2 backdrop-blur dark:border-white/10 dark:bg-ink-950/80">
@@ -218,7 +222,7 @@ export function Avatar({ name, src, size = 'h-8 w-8' }) {
   );
 }
 
-function WorkspaceSelector() {
+function WorkspaceSelector({ onCreateWorkspace }) {
   const dispatch = useDispatch();
   const nav = useNavigate();
   const { workspaces, current } = useSelector((s) => s.data);
@@ -279,8 +283,84 @@ function WorkspaceSelector() {
               </button>
             );
           })}
+          <button
+            type="button"
+            className="mt-1 flex w-full items-center gap-2 border-t border-stone-200/80 px-3 py-2.5 text-left text-sm font-medium text-accent transition hover:bg-stone-50 dark:border-white/10 dark:hover:bg-white/5"
+            onClick={() => {
+              onCreateWorkspace();
+              setOpen(false);
+            }}
+          >
+            <Plus size={16} />
+            <span>Create Workspace</span>
+          </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function CreateWorkspaceModal({ onClose }) {
+  const dispatch = useDispatch();
+  const nav = useNavigate();
+  const [name, setName] = useState('My workspace');
+  const [saving, setSaving] = useState(false);
+
+  async function createWorkspace(e) {
+    e.preventDefault();
+    if (!name.trim() || saving) return;
+
+    setSaving(true);
+    try {
+      const { data } = await api.post('/workspaces', { name: name.trim() });
+      await dispatch(loadWorkspaces());
+      dispatch(loadWorkspace(data._id));
+      dispatch(loadProjects(data._id));
+      nav(`/w/${data._id}`);
+      toast.success('Workspace created');
+      onClose();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Could not create workspace');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-ink-950/45 p-4" role="presentation" onMouseDown={onClose}>
+      <div
+        className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-ink-900"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-workspace-title"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="create-workspace-title" className="font-display text-2xl">Create Workspace</h2>
+            <p className="mt-1 text-sm text-stone-500">Start a new space for your team.</p>
+          </div>
+          <button type="button" className="btn-ghost px-2" onClick={onClose} aria-label="Close modal">×</button>
+        </div>
+        <form className="mt-6 space-y-4" onSubmit={createWorkspace}>
+          <label className="block text-sm font-medium">
+            Workspace name
+            <input
+              className="input mt-2"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              required
+            />
+          </label>
+          <div className="flex justify-end gap-2">
+            <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-primary" disabled={saving}>
+              {saving ? 'Creating…' : 'Create Workspace'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
