@@ -7,11 +7,9 @@ import { toast } from 'sonner';
 import { canEdit } from '../lib/utils.js';
 
 export default function WorkspaceHome() {
-  const { current, projects, loading } = useSelector((s) => ({
-    current: s.data.current,
-    projects: s.data.projects,
-    loading: s.data.loading,
-  }));
+  const current = useSelector((s) => s.data.current);
+  const projects = useSelector((s) => s.data.projects);
+  const loading = useSelector((s) => s.data.loading);
   const dispatch = useDispatch();
   const nav = useNavigate();
   const [templates, setTemplates] = useState([]);

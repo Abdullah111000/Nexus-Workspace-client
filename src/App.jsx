@@ -45,7 +45,7 @@ export default function App() {
   if (token && status === 'loading') {
     return (
       <div className="grid min-h-screen place-items-center bg-ink-50 dark:bg-ink-950">
-        <div className="skeleton h-10 w-40" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-accent dark:border-white/15 dark:border-t-accent" aria-label="Loading" />
       </div>
     );
   }
