@@ -52,7 +52,7 @@ export default function WorkspaceHome() {
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-accent">Workspace</p>
           <h1 className="font-display mt-1 text-4xl">
-            {current.icon} {current.name}
+            <span style={{ color: current.color }}>{current.icon}</span> {current.name}
           </h1>
           <p className="mt-1 text-sm text-stone-500">
             Your role: <span className="font-medium capitalize text-ink-900 dark:text-ink-50">{role}</span>

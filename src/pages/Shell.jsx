@@ -249,7 +249,7 @@ function WorkspaceSelector({ onCreateWorkspace }) {
         onClick={() => setOpen((o) => !o)}
       >
         <span className="flex items-center gap-2 truncate">
-          <span className="text-accent">{current?.icon || '✦'}</span>
+          <span style={{ color: current?.color || undefined }}>{current?.icon || '✦'}</span>
           <span className="truncate">{current?.name || 'Workspace'}</span>
         </span>
         <ChevronDown size={14} className={`shrink-0 text-stone-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
