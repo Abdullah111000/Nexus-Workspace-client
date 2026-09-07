@@ -36,6 +36,8 @@ const slice = createSlice({
   initialState: {
     workspaces: [],
     current: null,
+    workspacesStatus: 'idle',
+    currentStatus: 'idle',
     projects: [],
     tasks: [],
     subtasks: [],
@@ -59,11 +61,25 @@ const slice = createSlice({
     },
   },
   extraReducers: (b) => {
-    b.addCase(loadWorkspaces.fulfilled, (s, a) => {
-      s.workspaces = a.payload;
+    b.addCase(loadWorkspaces.pending, (s) => {
+      s.workspacesStatus = 'loading';
     })
+      .addCase(loadWorkspaces.fulfilled, (s, a) => {
+        s.workspacesStatus = 'ready';
+        s.workspaces = a.payload;
+      })
+      .addCase(loadWorkspaces.rejected, (s) => {
+        s.workspacesStatus = 'error';
+      })
+      .addCase(loadWorkspace.pending, (s) => {
+        s.currentStatus = 'loading';
+      })
       .addCase(loadWorkspace.fulfilled, (s, a) => {
+        s.currentStatus = 'ready';
         s.current = a.payload;
+      })
+      .addCase(loadWorkspace.rejected, (s) => {
+        s.currentStatus = 'error';
       })
       .addCase(loadProjects.fulfilled, (s, a) => {
         s.projects = a.payload;

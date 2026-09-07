@@ -8,6 +8,9 @@ import { canEdit } from '../lib/utils.js';
 
 export default function WorkspaceHome() {
   const current = useSelector((s) => s.data.current);
+  const workspaces = useSelector((s) => s.data.workspaces);
+  const workspacesStatus = useSelector((s) => s.data.workspacesStatus);
+  const currentStatus = useSelector((s) => s.data.currentStatus);
   const projects = useSelector((s) => s.data.projects);
   const loading = useSelector((s) => s.data.loading);
   const dispatch = useDispatch();
@@ -16,10 +19,20 @@ export default function WorkspaceHome() {
   const [name, setName] = useState('');
   const [template, setTemplate] = useState('sprint');
   const role = current?.myRole;
+  const workspaceLoading =
+    workspacesStatus !== 'ready' || (workspaces.length > 0 && currentStatus !== 'ready');
 
   useEffect(() => {
     api.get('/projects/templates').then((r) => setTemplates(r.data));
   }, []);
+
+  if (workspaceLoading) {
+    return (
+      <div className="grid place-items-center py-24" aria-label="Loading workspace">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-accent" />
+      </div>
+    );
+  }
 
   if (!current) {
     return (
