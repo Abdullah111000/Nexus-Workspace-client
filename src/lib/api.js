@@ -16,7 +16,7 @@ export function resolveUrl(path) {
   return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-const api = axios.create({ baseURL: API_BASE });
+const api = axios.create({ baseURL: API_BASE, timeout: 20000 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('wm_token');

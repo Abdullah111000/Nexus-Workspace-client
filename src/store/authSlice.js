@@ -3,8 +3,13 @@ import api from '../lib/api.js';
 import { resetSocket } from '../lib/socket.js';
 
 export const fetchMe = createAsyncThunk('auth/me', async () => {
-  const { data } = await api.get('/users/me');
-  return data;
+  try {
+    const { data } = await api.get('/users/me');
+    return data;
+  } catch (error) {
+    localStorage.removeItem('wm_token');
+    throw error;
+  }
 });
 
 export const login = createAsyncThunk('auth/login', async (payload, { rejectWithValue }) => {
@@ -53,6 +58,7 @@ const slice = createSlice({
       .addCase(fetchMe.rejected, (s) => {
         s.status = 'idle';
         s.user = null;
+        s.error = 'Session expired. Please sign in again.';
       })
       .addCase(login.fulfilled, (s, a) => {
         s.user = a.payload;
