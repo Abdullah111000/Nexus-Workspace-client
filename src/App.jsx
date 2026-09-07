@@ -52,9 +52,9 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-      <Route path="/signup" element={user ? <Navigate to="/" /> : <Signup />} />
-      <Route path="/*" element={user ? <Shell /> : <Navigate to="/login" />} />
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/signup" element={user ? <Navigate to="/" replace /> : <Signup />} />
+      <Route path="/*" element={user ? <Shell /> : <Navigate to="/login" replace />} />
     </Routes>
   );
 }
