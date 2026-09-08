@@ -356,7 +356,8 @@ function CreateWorkspaceModal({ onClose }) {
           <div className="flex justify-end gap-2">
             <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Creating…' : 'Create Workspace'}
+              {saving && <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white align-[-2px]" aria-label="Loading" />}
+              {saving ? 'Creating...' : 'Create Workspace'}
             </button>
           </div>
         </form>

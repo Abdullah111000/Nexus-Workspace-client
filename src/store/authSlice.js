@@ -60,13 +60,22 @@ const slice = createSlice({
         s.user = null;
         s.error = 'Session expired. Please sign in again.';
       })
+      .addCase(login.pending, (s) => {
+        s.status = 'loading';
+        s.error = null;
+      })
       .addCase(login.fulfilled, (s, a) => {
         s.user = a.payload;
         s.error = null;
         s.status = 'ready';
       })
       .addCase(login.rejected, (s, a) => {
+        s.status = 'idle';
         s.error = a.payload;
+      })
+      .addCase(signup.pending, (s) => {
+        s.status = 'loading';
+        s.error = null;
       })
       .addCase(signup.fulfilled, (s, a) => {
         s.user = a.payload;
@@ -74,6 +83,7 @@ const slice = createSlice({
         s.status = 'ready';
       })
       .addCase(signup.rejected, (s, a) => {
+        s.status = 'idle';
         s.error = a.payload;
       })
       .addCase(updateMe.fulfilled, (s, a) => {

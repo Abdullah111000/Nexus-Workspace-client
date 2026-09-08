@@ -6,6 +6,7 @@ import { login } from '../store/authSlice.js';
 export default function Login() {
   const dispatch = useDispatch();
   const error = useSelector((s) => s.auth.error);
+  const loading = useSelector((s) => s.auth.status === 'loading');
   const [email, setEmail] = useState('owner@demo.com');
   const [password, setPassword] = useState('password123');
 
@@ -39,8 +40,9 @@ export default function Login() {
           <label className="mt-4 block text-xs font-medium uppercase tracking-wide text-stone-500">Password</label>
           <input className="input mt-1" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-          <button className="btn-primary mt-6 w-full" type="submit">
-            Enter workspace
+          <button className="btn-primary mt-6 flex w-full items-center justify-center gap-2" type="submit" disabled={loading}>
+            {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-label="Loading" />}
+            {loading ? 'Entering workspace...' : 'Enter workspace'}
           </button>
           <p className="mt-4 text-center text-sm text-stone-500">
             New here?{' '}

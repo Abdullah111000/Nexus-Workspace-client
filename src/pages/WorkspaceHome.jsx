@@ -133,6 +133,7 @@ export default function WorkspaceHome() {
 
 function CreateWorkspace() {
   const [name, setName] = useState('My workspace');
+  const [saving, setSaving] = useState(false);
   const dispatch = useDispatch();
   const nav = useNavigate();
   return (
@@ -140,15 +141,24 @@ function CreateWorkspace() {
       className="mt-6 flex gap-2"
       onSubmit={async (e) => {
         e.preventDefault();
-        const { data } = await api.post('/workspaces', { name });
-        await dispatch(loadWorkspaces());
-        dispatch(loadWorkspace(data._id));
-        dispatch(loadProjects(data._id));
-        nav(`/w/${data._id}`);
+        if (saving) return;
+        setSaving(true);
+        try {
+          const { data } = await api.post('/workspaces', { name });
+          await dispatch(loadWorkspaces());
+          dispatch(loadWorkspace(data._id));
+          dispatch(loadProjects(data._id));
+          nav(`/w/${data._id}`);
+        } finally {
+          setSaving(false);
+        }
       }}
     >
       <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
-      <button className="btn-primary">Create</button>
+      <button className="btn-primary inline-flex items-center gap-2" disabled={saving}>
+        {saving && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-label="Loading" />}
+        {saving ? 'Creating...' : 'Create'}
+      </button>
     </form>
   );
 }
