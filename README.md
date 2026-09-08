@@ -67,7 +67,6 @@ For local development, the Vite configuration uses the local backend proxy. For 
 
 ```env
 VITE_API_URL=https://nexus-workspace-server.vercel.app/api
-VITE_SOCKET_URL=https://YOUR_BACKEND_VERCEL_URL
 ```
 
 Do not commit private credentials or real secret values to this repository.
