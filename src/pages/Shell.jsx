@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   CalendarDays,
@@ -38,8 +38,9 @@ export default function Shell() {
   const user = useSelector((s) => s.auth.user);
   const { workspaces, current, notifications } = useSelector((s) => s.data);
   const { theme, sidebarOpen, offline, pendingQueue } = useSelector((s) => s.ui);
-  const { workspaceId } = useParams();
-  const wsId = workspaceId || current?._id || workspaces[0]?._id;
+  const { pathname } = useLocation();
+  const routeWorkspaceId = pathname.match(/^\/w\/([^/]+)/)?.[1];
+  const wsId = routeWorkspaceId || current?._id || workspaces[0]?._id;
   const [createWorkspaceOpen, setCreateWorkspaceOpen] = useState(false);
 
   useEffect(() => {
@@ -50,12 +51,15 @@ export default function Shell() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (workspaces.length && !current) {
-      const id = workspaces[0]._id;
-      dispatch(loadWorkspace(id));
+    if (!workspaces.length) return;
+    const id = routeWorkspaceId || workspaces[0]._id;
+    if (current?._id === id) {
       dispatch(loadProjects(id));
+      return;
     }
-  }, [workspaces, current, dispatch]);
+    dispatch(loadWorkspace(id));
+    dispatch(loadProjects(id));
+  }, [workspaces, current?._id, routeWorkspaceId, dispatch]);
 
   useEffect(() => {
     if (!wsId) return;
