@@ -52,7 +52,7 @@ export default function Shell() {
 
   useEffect(() => {
     if (!workspaces.length) return;
-    const id = routeWorkspaceId || workspaces[0]._id;
+    const id = routeWorkspaceId || current?._id || workspaces[0]._id;
     if (current?._id === id) {
       dispatch(loadProjects(id));
       return;
@@ -65,13 +65,27 @@ export default function Shell() {
     if (!wsId) return;
     const s = getSocket();
     s?.emit('join:workspace', wsId);
-    s?.on('notification:new', () => dispatch(loadNotifications()));
+    const handleNewNotification = (n) => {
+      dispatch(loadNotifications());
+      if (n?.title) {
+        toast.info(n.title, {
+          description: n.body,
+          action: n.project
+            ? {
+                label: 'View',
+                onClick: () => nav(`/w/${n.workspace || wsId}/p/${n.project}`),
+              }
+            : undefined,
+        });
+      }
+    };
+    s?.on('notification:new', handleNewNotification);
     s?.on('task:updated', () => {});
     return () => {
       s?.emit('leave:workspace', wsId);
-      s?.off('notification:new');
+      s?.off('notification:new', handleNewNotification);
     };
-  }, [wsId, dispatch]);
+  }, [wsId, dispatch, nav]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -108,7 +122,9 @@ export default function Shell() {
 
   const isHomeActive = pathname === '/' || (wsId ? pathname === `/w/${wsId}` || pathname === `/w/${wsId}/` : false);
   const isActivityActive = pathname === '/activity' || (wsId ? pathname === `/w/${wsId}/activity` : false);
+  const isSearchActive = pathname === '/search' || (wsId ? pathname === `/w/${wsId}/search` : false);
   const isSettingsActive = pathname === '/settings' || (wsId ? pathname === `/w/${wsId}/settings` : false);
+  const isProfileActive = pathname === '/profile' || (wsId ? pathname === `/w/${wsId}/profile` : false);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -137,7 +153,7 @@ export default function Shell() {
           <NavLink className={() => navCls({ isActive: isActivityActive })} to={current ? `/w/${current._id}/activity` : '/activity'}>
             <CalendarDays size={16} /> Activity
           </NavLink>
-          <NavLink className={navCls} to="/search">
+          <NavLink className={() => navCls({ isActive: isSearchActive })} to={current ? `/w/${current._id}/search` : '/search'}>
             <Search size={16} /> Search
           </NavLink>
           <NavLink className={() => navCls({ isActive: isSettingsActive })} to={current ? `/w/${current._id}/settings` : '/settings'}>
@@ -146,13 +162,17 @@ export default function Shell() {
           <div className="px-3 pb-1 pt-4 text-[11px] uppercase tracking-wider text-stone-400">Projects</div>
           <ProjectLinks />
         </nav>
-        <button
-          className="m-3 flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5"
-          onClick={() => nav('/profile')}
+        <NavLink
+          className={() =>
+            `m-3 flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 text-left text-sm ${
+              isProfileActive ? 'bg-white shadow-sm dark:bg-white/10' : 'hover:bg-black/5 dark:hover:bg-white/5'
+            }`
+          }
+          to={current ? `/w/${current._id}/profile` : '/profile'}
         >
           <Avatar name={user.name} src={user.avatar} />
           <span className="truncate">{user.name}</span>
-        </button>
+        </NavLink>
       </aside>
 
       {createWorkspaceOpen && <CreateWorkspaceModal onClose={() => setCreateWorkspaceOpen(false)} />}
@@ -196,6 +216,8 @@ export default function Shell() {
             <Route path="/w/:workspaceId/p/:projectId" element={<ProjectPage />} />
             <Route path="/w/:workspaceId/settings" element={<SettingsPage />} />
             <Route path="/w/:workspaceId/activity" element={<ActivityPage />} />
+            <Route path="/w/:workspaceId/search" element={<SearchPage />} />
+            <Route path="/w/:workspaceId/profile" element={<ProfilePage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/search" element={<SearchPage />} />
           </Routes>

@@ -40,7 +40,8 @@ export default function CommandPalette() {
       { label: 'Go home', to: current ? `/w/${current._id}` : '/' },
       { label: 'Settings', to: current ? `/w/${current._id}/settings` : '/' },
       { label: 'Activity', to: current ? `/w/${current._id}/activity` : '/' },
-      { label: 'Profile', to: '/profile' },
+      { label: 'Search', to: current ? `/w/${current._id}/search` : '/search' },
+      { label: 'Profile', to: current ? `/w/${current._id}/profile` : '/profile' },
       ...projects.map((p) => ({ label: `Open ${p.name}`, to: `/w/${current?._id}/p/${p._id}` })),
       ...workspaces.map((w) => ({ label: `Switch to ${w.name}`, to: `/w/${w._id}` })),
     ];
