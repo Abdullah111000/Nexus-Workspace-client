@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import api from '../lib/api.js';
 import { updateMe } from '../store/authSlice.js';
 import { loadProjects, loadWorkspace, loadWorkspaces } from '../store/dataSlice.js';
-import { canAdmin, isOwner } from '../lib/utils.js';
+import { canAdmin, isOwner, getMyRole } from '../lib/utils.js';
 import Confirm from '../components/Confirm.jsx';
 
 export default function SettingsPage() {
@@ -24,7 +24,7 @@ export default function SettingsPage() {
   }, [workspaceId, dispatch]);
 
   if (!current) return <div className="skeleton h-40" />;
-  const role = current.myRole;
+  const role = getMyRole(current, user);
 
   async function saveWs(patch) {
     if (!canAdmin(role)) return toast.error('Access denied');

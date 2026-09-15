@@ -3,14 +3,14 @@ import { useSelector } from 'react-redux';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import api, { resolveUrl } from '../lib/api.js';
-import { canEdit } from '../lib/utils.js';
+import { canEdit, getMyRole } from '../lib/utils.js';
 import Confirm from './Confirm.jsx';
 
 export default function TaskModal({ taskId, onClose, onDelete }) {
   const me = useSelector((s) => s.auth.user);
-  const role = useSelector((s) => s.data.current?.myRole);
-  const directory = useSelector((s) => s.data.directory);
   const current = useSelector((s) => s.data.current);
+  const role = getMyRole(current, me);
+  const directory = useSelector((s) => s.data.directory);
   const [task, setTask] = useState(null);
   const [subs, setSubs] = useState([]);
   const [comments, setComments] = useState([]);

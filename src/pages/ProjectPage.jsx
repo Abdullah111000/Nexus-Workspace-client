@@ -8,22 +8,26 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOf
 import { toast } from 'sonner';
 import api from '../lib/api.js';
 import { loadProjects, loadTasks, loadWorkspace, upsertTask, removeTask } from '../store/dataSlice.js';
-import { pushUndo, toggleSelected, clearSelected, setSelected } from '../store/uiSlice.js';
-import { canEdit, canAdmin } from '../lib/utils.js';
+import { pushUndo, toggleSelected, clearSelected } from '../store/uiSlice.js';
+import { canEdit, getMyRole } from '../lib/utils.js';
 import TaskModal from '../components/TaskModal.jsx';
+import CreateTaskModal from '../components/CreateTaskModal.jsx';
 import Confirm from '../components/Confirm.jsx';
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
   const dispatch = useDispatch();
+  const user = useSelector((s) => s.auth.user);
   const { current, tasks, subtasks, projects, loading } = useSelector((s) => s.data);
   const selected = useSelector((s) => s.ui.selectedTaskIds);
-  const role = current?.myRole;
+  const role = getMyRole(current, user);
   const project = projects.find((p) => p._id === projectId);
   const [view, setView] = useState(project?.lastView || 'board');
   const [filters, setFilters] = useState({ assignee: '', priority: '', status: '', label: '', sort: 'order', q: '' });
   const [presets, setPresets] = useState([]);
   const [openTask, setOpenTask] = useState(null);
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [createStatus, setCreateStatus] = useState('');
   const [groupBy, setGroupBy] = useState('none');
   const [confirm, setConfirm] = useState(null);
   const [activeDrag, setActiveDrag] = useState(null);
@@ -56,7 +60,7 @@ export default function ProjectPage() {
     const onKey = async (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && canEdit(role)) {
         e.preventDefault();
-        await createTask();
+        openCreateTask();
       }
       if (e.key === '1') setViewAndPersist('board');
       if (e.key === '2') setViewAndPersist('list');
@@ -71,13 +75,14 @@ export default function ProjectPage() {
     if (canEdit(role)) await api.patch(`/projects/${projectId}`, { lastView: v });
   }
 
-  async function createTask(status) {
-    const { data } = await api.post(`/tasks/project/${projectId}`, {
-      title: 'New task',
-      status: status || project?.columns?.[0]?.id,
-    });
+  function openCreateTask(status) {
+    setCreateStatus(status || project?.columns?.[0]?.id || '');
+    setCreateTaskOpen(true);
+  }
+
+  async function handleCreateTask(taskData) {
+    await api.post(`/tasks/project/${projectId}`, taskData);
     dispatch(loadTasks({ projectId, params: filters }));
-    setOpenTask(data._id);
     toast.success('Task created');
   }
 
@@ -138,7 +143,7 @@ export default function ProjectPage() {
             </button>
           ))}
           {canEdit(role) && (
-            <button className="btn-primary" onClick={() => createTask()}>
+            <button className="btn-primary" onClick={() => openCreateTask()}>
               New task
             </button>
           )}
@@ -289,7 +294,7 @@ export default function ProjectPage() {
                   tasks={tasks.filter((t) => t.status === col.id)}
                   subtasks={subtasks}
                   onOpen={setOpenTask}
-                  onCreate={() => createTask(col.id)}
+                  onCreate={() => openCreateTask(col.id)}
                   canEdit={canEdit(role)}
                   selected={selected}
                   onToggle={(id) => dispatch(toggleSelected(id))}
@@ -332,6 +337,16 @@ export default function ProjectPage() {
 
       {!loading && !tasks.length && (
         <div className="panel mt-8 p-12 text-center text-stone-500">No tasks match these filters.</div>
+      )}
+
+      {createTaskOpen && (
+        <CreateTaskModal
+          columns={project.columns || []}
+          initialStatus={createStatus}
+          members={current?.members?.map((m) => m.user) || []}
+          onClose={() => setCreateTaskOpen(false)}
+          onCreate={handleCreateTask}
+        />
       )}
 
       {openTask && (

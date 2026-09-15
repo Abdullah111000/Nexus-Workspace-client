@@ -12,6 +12,18 @@ export function isOwner(role) {
   return role === 'owner';
 }
 
+export function getMyRole(workspace, user) {
+  if (!workspace || !user) return 'viewer';
+  const member = workspace.members?.find((m) => {
+    const memberId = m.user?._id || m.user;
+    const userId = user._id || user.id;
+    if (memberId && userId && memberId.toString() === userId.toString()) return true;
+    if (m.user?.email && user.email && m.user.email.toLowerCase() === user.email.toLowerCase()) return true;
+    return false;
+  });
+  return member?.role || workspace.myRole || 'viewer';
+}
+
 export const PRIORITY = ['low', 'medium', 'high', 'urgent'];
 
 export function initials(name = '') {

@@ -106,42 +106,48 @@ export default function Shell() {
     }
   }
 
+  const isHomeActive = pathname === '/' || (wsId ? pathname === `/w/${wsId}` || pathname === `/w/${wsId}/` : false);
+  const isActivityActive = pathname === '/activity' || (wsId ? pathname === `/w/${wsId}/activity` : false);
+  const isSettingsActive = pathname === '/settings' || (wsId ? pathname === `/w/${wsId}/settings` : false);
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       {sidebarOpen && (
         <div className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={() => dispatch(setSidebar(false))} />
       )}
       <aside
-        className={`fixed z-40 flex h-full w-[260px] flex-col border-r border-stone-200/80 bg-[#f7f3ea] dark:border-white/10 dark:bg-ink-900 lg:static ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-full w-[260px] shrink-0 flex-col border-r border-stone-200/80 bg-[#f7f3ea] dark:border-white/10 dark:bg-ink-900 lg:static lg:h-full transition-transform duration-200 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:hidden'
         }`}
       >
-        <div className="flex items-center gap-2 px-4 py-5">
+        <div className="flex shrink-0 items-center gap-2 px-4 py-5">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-ink-900 text-sm text-ink-50 dark:bg-accent">N</span>
           <div>
             <div className="text-sm font-semibold">Nexus</div>
             <div className="text-[11px] text-stone-500">Workspace OS</div>
           </div>
         </div>
-        <WorkspaceSelector onCreateWorkspace={() => setCreateWorkspaceOpen(true)} />
-        <nav className="flex-1 space-y-1 px-2 text-sm">
-          <NavLink className={navCls} to={current ? `/w/${current._id}` : '/'}>
+        <div className="shrink-0">
+          <WorkspaceSelector onCreateWorkspace={() => setCreateWorkspaceOpen(true)} />
+        </div>
+        <nav className="flex-1 space-y-1 overflow-y-auto px-2 text-sm">
+          <NavLink end className={() => navCls({ isActive: isHomeActive })} to={current ? `/w/${current._id}` : '/'}>
             <LayoutDashboard size={16} /> Home
           </NavLink>
-          <NavLink className={navCls} to={current ? `/w/${current._id}/activity` : '/activity'}>
+          <NavLink className={() => navCls({ isActive: isActivityActive })} to={current ? `/w/${current._id}/activity` : '/activity'}>
             <CalendarDays size={16} /> Activity
           </NavLink>
           <NavLink className={navCls} to="/search">
             <Search size={16} /> Search
           </NavLink>
-          <NavLink className={navCls} to={current ? `/w/${current._id}/settings` : '/settings'}>
+          <NavLink className={() => navCls({ isActive: isSettingsActive })} to={current ? `/w/${current._id}/settings` : '/settings'}>
             <Settings size={16} /> Settings
           </NavLink>
           <div className="px-3 pb-1 pt-4 text-[11px] uppercase tracking-wider text-stone-400">Projects</div>
           <ProjectLinks />
         </nav>
         <button
-          className="m-3 flex items-center gap-2 rounded-xl px-2 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5"
+          className="m-3 flex shrink-0 items-center gap-2 rounded-xl px-2 py-2 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5"
           onClick={() => nav('/profile')}
         >
           <Avatar name={user.name} src={user.avatar} />
@@ -151,8 +157,8 @@ export default function Shell() {
 
       {createWorkspaceOpen && <CreateWorkspaceModal onClose={() => setCreateWorkspaceOpen(false)} />}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-stone-200/70 bg-ink-50/80 px-3 py-2 backdrop-blur dark:border-white/10 dark:bg-ink-950/80">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="sticky top-0 z-20 flex shrink-0 items-center gap-2 border-b border-stone-200/70 bg-ink-50/80 px-3 py-2 backdrop-blur dark:border-white/10 dark:bg-ink-950/80">
           <button className="btn-ghost px-2" onClick={() => dispatch(toggleSidebar())}>
             <Menu size={16} />
           </button>
@@ -183,7 +189,7 @@ export default function Shell() {
             <span className="hidden sm:inline">Log out</span>
           </button>
         </header>
-        <main className="min-h-0 flex-1 overflow-auto p-4 lg:p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto p-4 lg:p-6">
           <Routes>
             <Route path="/" element={<WorkspaceHome />} />
             <Route path="/w/:workspaceId" element={<WorkspaceHome />} />

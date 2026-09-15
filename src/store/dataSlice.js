@@ -92,11 +92,26 @@ const slice = createSlice({
         s.tasks = a.payload.tasks;
         s.subtasks = a.payload.subtasks;
       })
+      .addCase(loadTasks.rejected, (s) => {
+        s.loading = false;
+      })
       .addCase(loadNotifications.fulfilled, (s, a) => {
         s.notifications = a.payload;
       })
       .addCase(loadDirectory.fulfilled, (s, a) => {
         s.directory = a.payload;
+      })
+      .addCase('auth/logout', (s) => {
+        s.workspaces = [];
+        s.current = null;
+        s.workspacesStatus = 'idle';
+        s.currentStatus = 'idle';
+        s.projects = [];
+        s.tasks = [];
+        s.subtasks = [];
+        s.notifications = { items: [], unread: 0 };
+        s.directory = [];
+        s.loading = false;
       });
   },
 });
